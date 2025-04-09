@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>העורך התורני שלך</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+      direction: rtl;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-size: 14px;
+      padding: 10px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      font-size: 14px;
+      margin-inline-end: 10px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    async function loadSelectedText() {
+      try {
+        await Word.run(async context => {
+          const range = context.document.getSelection();
+          range.load("text");
+          await context.sync();
+          document.getElementById("text").value = range.text;
+        });
+      } catch (error) {
+        console.error("Error reading selection:", error);
+      }
+    }
+
+    function openChat(promptType) {
+      const text = document.getElementById("text").value;
+      let promptText = "";
+      if (promptType === "edit") {
+        promptText = "אנא ערוך בלשון תורנית את הטקסט הבא:\n";
+      } else if (promptType === "sources") {
+        promptText = "ציין מקורות תורניים מתאימים לטקסט הבא:\n";
+      }
+      const fullPrompt = encodeURIComponent(promptText + text);
+      const url = "https://chat.openai.com/g/g-67e5b68216cc81919d51c8cbf3471c93-h-vrk-htvrny-shlk?prompt=" + fullPrompt;
+      window.open(url, "_blank");
+    }
+
+    Office.onReady(info => {
+      if (info.host === Office.HostType.Word) {
+        loadSelectedText();
+      }
+    });
+  </script>
+</head>
+<body>
+  <h1>העורך התורני שלך</h1>
+  <textarea id="text" placeholder="הטקסט יופיע כאן..."></textarea><br>
+  <button onclick="openChat('edit')">שפר ניסוח</button>
+  <button onclick="openChat('sources')">בדוק מקורות</button>
+</body>
+</html>
